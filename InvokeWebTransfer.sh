@@ -1,3 +1,10 @@
+#!/bin/bash
+
+#####################################################################################
+# Hacker Hermanos                       https://linktr.ee/hackerhermanos            #
+# by @gustanini (Rafael Pimentel)       https://www.linkedin.com/in/rafa-pimentel/  #
+#####################################################################################
+
 # global vars
 NETWORK_INTERFACE=""
 PORT=80
@@ -49,6 +56,7 @@ print_usage() {
     echo "  -n, --network IFACE    Specify the network interface (example: eth0)."
     echo "  By default, the script will look for tun0, then eth0."
     echo "  -p, --port PORT        Specify the port (default is 80)"
+    echo "  -s, --silent           Silent mode, no banner"
     echo "  -w, --webroot PATH     Specify the webroot path"
     echo "  -wc, --webclient       Use webclient for file transfers"
     echo "  -h, --help             Display this help message and exit"
