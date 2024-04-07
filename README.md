@@ -29,6 +29,7 @@ This project provides a Bash script, InvokeWebTransfer.sh.sh, designed to genera
 - `-i, --ip IP` Specify the IP address or hostname.
 - `-n, --network IFACE` Specify the network interface.
 - `-p, --port PORT` Specify the port (default is 80).
+- `-s, --silent` Silent mode, do not print banner.
 - `-w, --webroot PATH` Specify the webroot path.
 - `-wc, --webclient` Use webclient for file transfers.
 - `-h, --help` Display the help message and exit.
