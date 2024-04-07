@@ -1,10 +1,3 @@
-#!/bin/bash
-
-#####################################################################################
-# Hacker Hermanos                       https://linktr.ee/hackerhermanos            #
-# by @gustanini (Rafael Pimentel)       https://www.linkedin.com/in/rafa-pimentel/  #
-#####################################################################################
-
 # global vars
 NETWORK_INTERFACE=""
 PORT=80
@@ -14,11 +7,36 @@ WEBROOT="/var/www/html"
 BITSADMIN_MODE=false
 CERTUTIL_MODE=false
 CRADLE_MODE=false 
+PRINT_BANNER=true
 WEBCLIENT_MODE=false
 
 ####################
 #### Functions #####
 ####################
+
+print_banner(){
+    # Define ANSI color code for green and reset.
+    green='\033[0;32m'
+    reset='\033[0m'
+
+    # Read banner line by line
+    while IFS= read -r line; do
+        # Print each line in green
+        printf "%b\n" "${green}${line}${reset}"
+        # Delay for 0.1 seconds
+        sleep 0.1
+    done << 'EOF'
+     _    _            _               _    _                                           
+    | |  | |          | |             | |  | |                                          
+    | |__| | __ _  ___| | _____ _ __  | |__| | ___ _ __ _ __ ___   __ _ _ ___  ___  ___ 
+    |  __  |/ _` |/ __| |/ / _ \ '__| |  __  |/ _ \ '__| '_ ` _ \ / _` | '_  \/ _ \/ __|
+    | |  | | (_| | (__|   <  __/ |    | |  | |  __/ |  | | | | | | (_| | | | | (_) \__ \.
+    |_|  |_|\__,_|\___|_|\_\___|_|    |_|  |_|\___|_|  |_| |_| |_|\__,_|_| |_|\___/|___/
+
+    It's a big club, and YOU can be in it!
+EOF
+    sleep 2
+}
 
 # Print usage/help message
 print_usage() {
@@ -67,6 +85,7 @@ while [ "$#" -gt 0 ]; do
         -i|--ip) USER_IP="$2"; shift ;;
         -n|--network) NETWORK_INTERFACE="$2"; shift ;;
         -p|--port) PORT="$2"; shift ;;
+        -s|--silent) PRINT_BANNER=false; shift ;;
         -w|--webroot) WEBROOT="$2"; shift ;;
         -wc|--webclient) WEBCLIENT_MODE=true; shift ;;
         *) echo "Unknown parameter passed: $1"; print_usage; exit 1 ;;
@@ -84,6 +103,12 @@ if [ -z $USER_IP ]; then
         echo "[-] IP could not be solved"
         exit
     fi
+fi
+
+# print banner
+if [ "$PRINT_BANNER" = true ]; then 
+    print_banner
+    echo \n
 fi
 
 # print info
@@ -141,10 +166,3 @@ while IFS= read -r -d '' FILE; do
     fi
 done < <(find "$WEBROOT" -type f -print0)
 ) | sort 
-
-###############
-#### To-Do ####
-###############
-# add linux support 
-# add "all" mode
-# add more lolbins techniques to download files
