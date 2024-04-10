@@ -2,7 +2,7 @@
 
 ## Description
 
-This project provides a Bash script, InvokeWebTransfer.sh.sh, designed to generate file transfer commands for various methods (bitsadmin, certutil, PowerShell's Invoke-WebRequest, and WebClient) based on files within a specified webroot directory (default is /var/www/html). It supports multiple flags for customizing the output based on the user's needs.
+This project provides a Bash script, InvokeWebTransfer.sh, designed to generate file transfer commands for various methods (bitsadmin, certutil, PowerShell's Invoke-WebRequest, and .Net.WebClient) based on files within a specified webroot directory (default is /var/www/html). It supports multiple flags for customizing the output based on the user's needs.
 
 ## Features
 
